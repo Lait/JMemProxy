@@ -38,8 +38,9 @@ public class JMemProxy implements Runnable {
 	 */
 	@Override
 	public void run() {
+		System.out.println("JMemProxy running on port " + this.port);
 		try {
-			channel.socket().bind(new InetSocketAddress(host, port));
+			channel.socket().bind(new InetSocketAddress(port));
 			channel.register(selector, SelectionKey.OP_ACCEPT);
 			while (true) {
 				int count = selector.select();
@@ -113,5 +114,6 @@ public class JMemProxy implements Runnable {
 	
 	public static void main(String[] args) throws Exception {
 		JMemProxy server = new JMemProxy(InetAddress.getLocalHost(), 11218);
+		server.run();
 	}
 }
