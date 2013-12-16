@@ -13,12 +13,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import jmemproxy.consistenthashing.Ketama;
+
 public class JMemProxy implements Runnable {
 	private int port;
 	private InetAddress host;
 	private ServerSocketChannel channel;
 	private Selector selector;
 	private ByteBuffer buffer = ByteBuffer.allocate(1024);
+	
+	private Ketama ketama = new Ketama();
 	
 	/**
 	 * 若要保证所有信息都传回client, 这里可以把byte[]改为队列或其他容器
@@ -40,6 +44,10 @@ public class JMemProxy implements Runnable {
 	public void run() {
 		System.out.println("JMemProxy running on port " + this.port);
 		try {
+			
+			//Maybe useful in the future?
+			//channel.socket().bind(new InetSocketAddress(host, port));
+			
 			channel.socket().bind(new InetSocketAddress(port));
 			channel.register(selector, SelectionKey.OP_ACCEPT);
 			while (true) {
