@@ -20,7 +20,8 @@ public class JMemProxy implements Runnable {
 	private int port;
 	private InetAddress host;
 	private ServerSocketChannel channel;
-	private Selector selector;
+	private Selector frontSelector;
+	private Selector backSelector;
 	private ByteBuffer buffer = ByteBuffer.allocate(1024);
 	
 	private Ketama ketama = new Ketama();
@@ -35,7 +36,8 @@ public class JMemProxy implements Runnable {
 		this.port = port;
 		channel = ServerSocketChannel.open();
 		channel.configureBlocking(false);
-		selector = Selector.open();
+		this.frontSelector = Selector.open();
+		this.backSelector = null;
 	}
 	
 	/**
@@ -50,13 +52,13 @@ public class JMemProxy implements Runnable {
 			//channel.socket().bind(new InetSocketAddress(host, port));
 			
 			channel.socket().bind(new InetSocketAddress(port));
-			channel.register(selector, SelectionKey.OP_ACCEPT);
+			channel.register(frontSelector, SelectionKey.OP_ACCEPT);
 			while (true) {
-				int count = selector.select();
+				int count = frontSelector.select();
 				if (count < 1) {
 					continue;
 				}
-				Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
+				Iterator<SelectionKey> iterator = frontSelector.selectedKeys().iterator();
 				while (iterator.hasNext()) {
 					SelectionKey key = iterator.next();
 					iterator.remove();
@@ -66,7 +68,7 @@ public class JMemProxy implements Runnable {
 					if (key.isAcceptable()) {
 						SocketChannel ch = ((ServerSocketChannel)key.channel()).accept();
 						ch.configureBlocking(false);
-						ch.register(selector, SelectionKey.OP_READ);
+						ch.register(frontSelector, SelectionKey.OP_READ);
 					} else if (key.isReadable()) {
 						read(key);
 					} else if (key.isWritable()) {
