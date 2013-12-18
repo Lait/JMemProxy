@@ -11,9 +11,14 @@ import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import jmemproxy.memcache.ServerNode;
+import jmemproxy.memcache.MemcacheServerNode;
 import jmemproxy.consistenthashing.Ketama;
+import jmemproxy.consistenthashing.MD5Hash;
 
 
 public class JMemProxy implements Runnable {
@@ -24,7 +29,10 @@ public class JMemProxy implements Runnable {
 	private Selector backSelector;
 	private ByteBuffer buffer = ByteBuffer.allocate(1024);
 	
-	private Ketama ketama = new Ketama();
+	//Is it necessary to put a list here?
+	private List<ServerNode> serverList;
+	
+	private Ketama ketama;
 	
 	/**
 	 * 若要保证所有信息都传回client, 这里可以把byte[]改为队列或其他容器
@@ -32,12 +40,17 @@ public class JMemProxy implements Runnable {
 	private Map<SocketChannel, byte[]> messages = new HashMap<SocketChannel, byte[]>();
 	
 	public JMemProxy(InetAddress host, int port) throws Exception {
-		this.host = host;
-		this.port = port;
-		channel = ServerSocketChannel.open();
-		channel.configureBlocking(false);
+		this.host          = host;
+		this.port          = port;
+		
+		this.channel       = ServerSocketChannel.open();
+		this.channel.configureBlocking(false);
+		
 		this.frontSelector = Selector.open();
-		this.backSelector = null;
+		this.backSelector  = null;
+		
+		//this.serverList    = new LinkedList<ServerNode>();
+		this.ketama        = new Ketama(new MD5Hash(), 1, this.serverList);
 	}
 	
 	/**

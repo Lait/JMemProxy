@@ -1,6 +1,6 @@
 package jmemproxy.consistenthashing;
 
-public class ConsistentHash implements HashFunction {
+public class MD5Hash implements HashFunction {
 
 	@Override
 	public int hash(Object key) {
