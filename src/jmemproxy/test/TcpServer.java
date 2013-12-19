@@ -19,13 +19,19 @@ class ServerThread implements Runnable {
 		}
 	}
 
-	@Override
 	public void run() {
 		String request = null;
 		String response = "Hello i'm server";
+		StringBuffer sb = new StringBuffer();
 		try {
 			while(true) {
 				request = this.read.readLine();
+				sb.setLength(0);
+				sb.append("From ");
+				sb.append(this.s.getRemoteSocketAddress().toString());
+				sb.append(":");
+				sb.append(request);
+				System.out.println(sb.toString());
 				this.write.write(response.getBytes());
 			}
 		} catch (IOException e) {

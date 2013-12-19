@@ -5,7 +5,6 @@ import java.security.NoSuchAlgorithmException;
 
 public class MD5Hash implements HashFunction {
 
-	@Override
 	public int hash(Object key) {
 		int result = 0;
 		try {

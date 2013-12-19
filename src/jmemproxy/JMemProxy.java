@@ -53,7 +53,6 @@ public class JMemProxy implements Runnable {
 	/**
 	 * @see java.lang.Runnable#run()
 	 */
-	@Override
 	public void run() {
 		System.out.println("JMemProxy running on port " + this.port);
 		try {
