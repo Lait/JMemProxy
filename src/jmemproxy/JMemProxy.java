@@ -34,9 +34,6 @@ public class JMemProxy implements Runnable {
 	
 	private Ketama ketama;
 	
-	/**
-	 * 若要保证所有信息都传回client, 这里可以把byte[]改为队列或其他容器
-	 */
 	private Map<SocketChannel, byte[]> messages = new HashMap<SocketChannel, byte[]>();
 	
 	public JMemProxy(InetAddress host, int port) throws Exception {
@@ -94,11 +91,7 @@ public class JMemProxy implements Runnable {
 		}
 	}
 	
-	/**
-	 * 读操作
-	 * @param key
-	 * @throws IOException
-	 */
+	//Read
 	private void read(SelectionKey key) throws IOException {
 		SocketChannel aChannel = (SocketChannel)key.channel();
 		buffer.clear();
@@ -116,11 +109,7 @@ public class JMemProxy implements Runnable {
 		}
 	}
 	
-	/**
-	 * 写操作
-	 * @param key
-	 * @throws IOException
-	 */
+	//Write
 	private void write(SelectionKey key) throws IOException {
 		SocketChannel aChannel = (SocketChannel)key.channel();
 		byte[] buf = messages.get(aChannel);
