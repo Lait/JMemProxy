@@ -3,17 +3,13 @@ package jmemproxy.consistenthashing;
 /*
  * Ketama.java
  * Description:
- * 
+ * The Ketama consistent hash function.
  * 
  * Author: Leon
  * Email : lleon.21.t@gmail.com
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 

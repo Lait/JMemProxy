@@ -1,5 +1,14 @@
 package jmemproxy.test;
 
+/*
+ * TcpClient.java
+ * Description:
+ * A simple TcpClient for integration testing.
+ * 
+ * Author: Leon
+ * Email : lleon.21.t@gmail.com
+ */
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;

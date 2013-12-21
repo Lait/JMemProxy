@@ -3,6 +3,15 @@ package jmemproxy.consistenthashing;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/*
+ * MD5Hash.java
+ * Description:
+ * A very simple md5 hash implements, may be too simple?
+ * 
+ * Author: Leon
+ * Email : lleon.21.t@gmail.com
+ */
+
 public class MD5Hash implements HashFunction {
 
 	public int hash(Object key) {

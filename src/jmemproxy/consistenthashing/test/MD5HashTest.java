@@ -3,7 +3,6 @@ package jmemproxy.consistenthashing.test;
 import static org.junit.Assert.*;
 import jmemproxy.consistenthashing.MD5Hash;
 import jmemproxy.memcache.MemcacheServerNode;
-import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;

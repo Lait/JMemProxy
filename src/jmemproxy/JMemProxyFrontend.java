@@ -1,5 +1,14 @@
 package jmemproxy;
 
+/*
+ * JMemProxyFrontend.java
+ * Description:
+ * The front-end logic.
+ * 
+ * Author: Leon
+ * Email : lleon.21.t@gmail.com
+ */
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -31,7 +40,7 @@ public class JMemProxyFrontend implements Runnable {
 		this.channel = ServerSocketChannel.open();
 		this.channel.configureBlocking(false);
 		
-		this.selector = Selector.open();
+		JMemProxyFrontend.selector = Selector.open();
 		this.buffer   = ByteBuffer.allocate(1024);
 		
 		messages = new HashMap<SocketChannel, byte[]>();
@@ -78,13 +87,13 @@ public class JMemProxyFrontend implements Runnable {
 			//channel.socket().bind(new InetSocketAddress(host, port));
 			
 			channel.socket().bind(new InetSocketAddress(port));
-			channel.register(this.selector, SelectionKey.OP_ACCEPT);
+			channel.register(JMemProxyFrontend.selector, SelectionKey.OP_ACCEPT);
 			while (true) {
-				int count = this.selector.select();
+				int count = JMemProxyFrontend.selector.select();
 				if (count < 1) {
 					continue;
 				}
-				Iterator<SelectionKey> iterator = this.selector.selectedKeys().iterator();
+				Iterator<SelectionKey> iterator = JMemProxyFrontend.selector.selectedKeys().iterator();
 				while (iterator.hasNext()) {
 					SelectionKey key = iterator.next();
 					iterator.remove();
@@ -94,7 +103,7 @@ public class JMemProxyFrontend implements Runnable {
 					if (key.isAcceptable()) {
 						SocketChannel ch = ((ServerSocketChannel)key.channel()).accept();
 						ch.configureBlocking(false);
-						ch.register(this.selector, SelectionKey.OP_READ);
+						ch.register(JMemProxyFrontend.selector, SelectionKey.OP_READ);
 					} else if (key.isReadable()) {
 						read(key);
 					} else if (key.isWritable()) {

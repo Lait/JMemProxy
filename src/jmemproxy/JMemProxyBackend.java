@@ -1,5 +1,14 @@
 package jmemproxy;
 
+/*
+ * JMemProxyBackend.java
+ * Description:
+ * The back-end logic.
+ * 
+ * Author: Leon
+ * Email : lleon.21.t@gmail.com
+ */
+
 import java.io.IOException;
 import java.nio.channels.Selector;
 import java.util.List;

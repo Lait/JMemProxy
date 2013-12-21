@@ -1,5 +1,15 @@
 package jmemproxy.test;
 
+/*
+ * TcpServer.java
+ * Description:
+ * A multiThreaded TcpServer for testing.
+ * May act as a fake Memcache server.
+ * 
+ * Author: Leon
+ * Email : lleon.21.t@gmail.com
+ */
+
 import java.io.*;
 import java.net.*;
 
