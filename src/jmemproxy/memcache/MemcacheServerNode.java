@@ -1,11 +1,15 @@
 package jmemproxy.memcache;
 
-public class MemcacheServerNode {
-	private int port;
-	private String ip;
+import java.nio.channels.SocketChannel;
+
+public class MemcacheServerNode extends ServerNode{
+	private SocketChannel channel;
 	
-	public MemcacheServerNode(int p, String ip) {
-		this.port = p;
-		this.ip = ip;
+	public MemcacheServerNode(int port, String ip, SocketChannel channel) {
+		this.port    = port;
+		this.ip      = ip;
+		this.channel = channel;
 	}
+	
+
 }

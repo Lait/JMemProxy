@@ -9,9 +9,11 @@ package jmemproxy.consistenthashing;
  * Email : lleon.21.t@gmail.com
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -50,12 +52,20 @@ public class Ketama {
 		return circle.get(keyhash);
 	}
 	
+	public final SortedMap<Integer, ServerNode> getAvailableServers() {
+		return this.circle;
+	}
+	
 	public void addServer(ServerNode node) {
 		//Add virtual nodes to the circle , it there a better way?
 		for (int i = 0; i < this.numOfReplicates; i++) {
 			int hash = this.hashfunction.hash(node.toString() + i);
 			this.circle.put(hash, node);
 		}
+	}
+	
+	public void removeServer(ServerNode node) {
+		
 	}
 
 }

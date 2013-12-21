@@ -21,7 +21,7 @@ class ServerThread implements Runnable {
 
 	public void run() {
 		String request = null;
-		String response = "Hello i'm server";
+		String response = "Hello i'm server on " + s.getInetAddress().toString();
 		StringBuffer sb = new StringBuffer();
 		try {
 			while(true) {
@@ -50,21 +50,27 @@ class ServerThread implements Runnable {
 
 public class TcpServer {
 	
-   public static void main(String args[]) throws IOException {
-      ServerSocket srvr = null;
-      Socket skt = null;
-      try {
-         srvr = new ServerSocket(1234);
-         while (true) {
-        	 skt = srvr.accept();
-        	 new ServerThread(skt).run();
-         }
+	public static void main(String args[]) throws IOException {
+		ServerSocket srvr = null;
+		Socket skt = null;
+		int port = 1234;
+		
+		if (args.length != 0) 
+			port = Integer.parseInt(args[0]);
+		
+		try {
+			srvr = new ServerSocket(port);
+			System.out.println("Server running on port " + port);
+			while (true) {
+				skt = srvr.accept();
+				new ServerThread(skt).run();
+			}
 
-      } catch(Exception e) {
-         System.out.print("Whoops! It didn't work!\n");
-      } finally {
-    	  if (srvr != null) srvr.close();
-    	  if (skt != null) skt.close();
-      }
-   }
+		} catch(Exception e) {
+			System.out.print("Whoops! It didn't work!\n");
+		} finally {
+			if (srvr != null) srvr.close();
+			if (skt != null) skt.close();
+		}
+	}
 }
