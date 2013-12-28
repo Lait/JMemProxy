@@ -16,28 +16,28 @@ import java.util.TreeMap;
 import jmemproxy.memcache.*;
 
 public class Ketama {
-	private SortedMap<Integer, ServerNode> circle;
+	private SortedMap<Integer, MemcacheServer> circle;
 	private HashFunction hashfunction;
 	private int numOfReplicates;
 	
-	public Ketama(HashFunction hashfunction, int numOfReplicates, Collection<ServerNode> nodes) {
+	public Ketama(HashFunction hashfunction, int numOfReplicates, Collection<MemcacheServer> nodes) {
 		this.hashfunction = hashfunction;
 		this.numOfReplicates = numOfReplicates;
-		this.circle = new TreeMap<Integer,  ServerNode>();
+		this.circle = new TreeMap<Integer,  MemcacheServer>();
 		
 		if (nodes != null) {
-			for (ServerNode node : nodes) {
+			for (MemcacheServer node : nodes) {
 				addServer(node);
 			}
 		}
 	}
 	
-	public ServerNode getServer(Object key) {
+	public MemcacheServer getServer(Object key) {
 		if (circle.isEmpty()) return null;
 		
 		int keyhash = this.hashfunction.hash(key);
 		if (!circle.containsKey(keyhash)) {
-			SortedMap<Integer, ServerNode> tailmap = circle.tailMap(this.hashfunction.hash(key));
+			SortedMap<Integer, MemcacheServer> tailmap = circle.tailMap(this.hashfunction.hash(key));
 			if (tailmap.isEmpty()) {
 				keyhash = (int) circle.firstKey();
 			} else {
@@ -48,11 +48,11 @@ public class Ketama {
 		return circle.get(keyhash);
 	}
 	
-	public final SortedMap<Integer, ServerNode> getAvailableServers() {
+	public final SortedMap<Integer, MemcacheServer> getAvailableServers() {
 		return this.circle;
 	}
 	
-	public void addServer(ServerNode node) {
+	public void addServer(MemcacheServer node) {
 		//Add virtual nodes to the circle , it there a better way?
 		for (int i = 0; i < this.numOfReplicates; i++) {
 			int hash = this.hashfunction.hash(node.toString() + i);
@@ -60,8 +60,12 @@ public class Ketama {
 		}
 	}
 	
-	public void removeServer(ServerNode node) {
-		
+	public void removeServer(MemcacheServer node) {
+		int hash = 0;
+		for (int i = 0; i < this.numOfReplicates; i++) {
+			hash = this.hashfunction.hash(node.toString() + i);
+			this.circle.remove(hash);
+		}
 	}
 
 }

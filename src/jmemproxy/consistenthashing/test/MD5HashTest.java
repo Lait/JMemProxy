@@ -2,7 +2,7 @@ package jmemproxy.consistenthashing.test;
 
 import static org.junit.Assert.*;
 import jmemproxy.consistenthashing.MD5Hash;
-import jmemproxy.memcache.MemcacheServerNode;
+import jmemproxy.memcache.MemcacheServer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -25,8 +25,8 @@ public class MD5HashTest {
 		int r2 = md5.hash("Hello I'm a key");
 		assertEquals(r1, r2);
 		
-		r1 = md5.hash((new MemcacheServerNode(1999, "localhost", null)).toString());
-		r2 = md5.hash((new MemcacheServerNode(1999, "localhost", null)).toString());
+		r1 = md5.hash((new MemcacheServer(1999, "localhost", null)).toString());
+		r2 = md5.hash((new MemcacheServer(1999, "localhost", null)).toString());
 		assertNotEquals(r1, r2);
 	}
 

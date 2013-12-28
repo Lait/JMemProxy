@@ -2,12 +2,10 @@ package jmemproxy.memcache;
 
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
-public class MemcacheServerNode extends ServerNode{
+public class MemcacheServer {
 	private SocketChannel channel;
-	private SocketChannel CurrentClientChannel;
 	private Queue<ClientRequest> requests;
 	
 	private int port;
@@ -21,7 +19,7 @@ public class MemcacheServerNode extends ServerNode{
 		return this.ip;
 	}
 	
-	public MemcacheServerNode(int port, String ip, SocketChannel channel) {
+	public MemcacheServer(int port, String ip, SocketChannel channel) {
 		this.port     = port;
 		this.ip       = ip;
 		this.channel  = channel;
@@ -32,20 +30,16 @@ public class MemcacheServerNode extends ServerNode{
 		return this.channel;
 	}
 	
-	public SocketChannel getCurrentClientChannel() {
-		return this.CurrentClientChannel;
-	}
-	
-	public void setCurrentSocketChannel(SocketChannel channel) {
-		this.CurrentClientChannel = channel;
-	}
-	
 	public int getRequestNum() {
 		return this.requests.size();
 	}
 	
-	public void pollRequest() {
-		this.requests.poll();
+	public ClientRequest peekRequest() {
+		return this.requests.peek();
+	}
+	
+	public ClientRequest pollRequest() {
+		return this.requests.poll();
 	}
 	
 	public void pushRequest(ClientRequest req) {

@@ -21,16 +21,4 @@ public class JMemProxyBackendTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
-	public void testInitialize() {
-		try {
-			JMemProxyBackend backend = new JMemProxyBackend();
-			assertEquals(backend.serverNum(), 1);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-
 }
