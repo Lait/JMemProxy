@@ -53,7 +53,9 @@ public class Ketama {
 	}
 	
 	public void addServer(MemcacheServer node) {
-		//Add virtual nodes to the circle , it there a better way?
+		// Add virtual nodes to the circle , it there a better way?
+		// This one is too simple, and not effective enough.
+		// Some better approaches needed! XD
 		for (int i = 0; i < this.numOfReplicates; i++) {
 			int hash = this.hashfunction.hash(node.toString() + i);
 			this.circle.put(hash, node);

@@ -38,7 +38,7 @@ public class MemcacheServer {
 		return this.requests.peek();
 	}
 	
-	public ClientRequest pollRequest() {
+	public ClientRequest getAndRemoveFirstRequest() {
 		return this.requests.poll();
 	}
 	

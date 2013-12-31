@@ -62,28 +62,30 @@ public class JMemProxyBackend implements Runnable {
 					SelectionKey key = iterator.next();
 					iterator.remove();
 					
-					if (!key.isValid()) continue;
-					if (key.isReadable()) {
+					if (key.isValid() && key.isReadable()) {
 						SocketChannel serverChannel = (SocketChannel)key.channel();
-						MemcacheServer server = this.servers.get(serverChannel.toString());
+						MemcacheServer server       = this.servers.get(serverChannel.toString());
+						
 						this.buffer.clear();
-						int num = serverChannel.read(buffer);
-						if (num > 0) {
-							ClientRequest req = server.pollRequest();
+						if (serverChannel.read(buffer) > 0) {
 							this.buffer.flip();
-							req.getChannel().write(buffer);
+							//Remove the first req and send back the response from memcache server.
+							server.getAndRemoveFirstRequest().getChannel().write(buffer);
 							
-							//Get the first un processed request.
-							req = server.peekRequest();
-							this.buffer.clear();
-							this.buffer.put(req.getRequestString().getBytes());
-							serverChannel.write(buffer);
+							//Send the message form the first unprocessed request to memcache server.
+							sendFirstReqToMemServer(server);
 						}
 					}
 				}
 			}
-		} catch(Exception ex) {
-			ex.printStackTrace();
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
+	}
+
+	private void sendFirstReqToMemServer(MemcacheServer server) throws IOException {
+		this.buffer.clear();
+		this.buffer.put(server.peekRequest().getRequestString().getBytes());
+		server.getServerChannel().write(buffer);
 	}
 }

@@ -10,14 +10,12 @@ public class JMemProxy {
 	private JMemProxyBackend  backend;
 	private JMemProxyFrontend frontend;
 	
-	//private JMemProxyFBCommunicator communicator;
-	
 	public JMemProxy(InetAddress host, int port) throws Exception {
 		this.host     = host;
 		this.port     = port;
 		
-		this.frontend = new JMemProxyFrontend(this.port, this.host);
 		this.backend  = new JMemProxyBackend();
+		this.frontend = new JMemProxyFrontend(this.port, this.host, this.backend);	
 	}
 	
 	public void start() {
