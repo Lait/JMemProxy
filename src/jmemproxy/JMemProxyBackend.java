@@ -15,24 +15,23 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
 
 import jmemproxy.consistenthashing.Ketama;
 import jmemproxy.consistenthashing.MD5Hash;
-import jmemproxy.memcache.ClientRequest;
 import jmemproxy.memcache.MemcacheServer;
 
 public class JMemProxyBackend implements Runnable {	
 	private static Selector  selector;
-	private Map<String, MemcacheServer> servers;
+	private Map<SocketChannel, MemcacheServer> servers;
 	private ByteBuffer buffer;
 	
 	private Ketama ketama;
 	
 	public JMemProxyBackend() throws IOException {
-		this.servers = new TreeMap<String, MemcacheServer>();
+		this.servers = new HashMap<SocketChannel, MemcacheServer>();
 		this.ketama  = new Ketama(new MD5Hash(), 1, null);
 		this.buffer  = ByteBuffer.allocate(2048);
 		
@@ -45,10 +44,14 @@ public class JMemProxyBackend implements Runnable {
 		if (channel != null) {
 			channel.configureBlocking(false);
 			MemcacheServer node = new MemcacheServer(1234, "127.0.0.1", channel);
-			this.servers.put(channel.toString(), node);
+			this.servers.put(channel, node);
 			this.ketama.addServer(node);
 			System.out.println("Server node (" + node.getIp() + ":" + node.getPort() + ") Added.");
 		}
+	}
+	
+	private void initServers() {
+		
 	}
 
 	public void run() {
@@ -64,7 +67,7 @@ public class JMemProxyBackend implements Runnable {
 					
 					if (key.isValid() && key.isReadable()) {
 						SocketChannel serverChannel = (SocketChannel)key.channel();
-						MemcacheServer server       = this.servers.get(serverChannel.toString());
+						MemcacheServer server = this.servers.get(serverChannel);
 						
 						this.buffer.clear();
 						if (serverChannel.read(buffer) > 0) {

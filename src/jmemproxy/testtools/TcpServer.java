@@ -31,7 +31,7 @@ class ServerThread implements Runnable {
 
 	public void run() {
 		String request = null;
-		String response = "Hello i'm server on " + s.getInetAddress().toString();
+		String response = "Hello i'm server on " + s.getInetAddress().toString() + "\n";
 		StringBuffer sb = new StringBuffer();
 		try {
 			while(true) {

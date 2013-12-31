@@ -4,6 +4,8 @@ import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import jmemproxy.client.ClientRequest;
+
 public class MemcacheServer {
 	private SocketChannel channel;
 	private Queue<ClientRequest> requests;

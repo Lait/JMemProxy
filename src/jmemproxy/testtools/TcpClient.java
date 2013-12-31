@@ -14,20 +14,28 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.CharBuffer;
 
 public class TcpClient {
 	public static void main(String argv[]) throws IOException {
 		String request;
-		String response;
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+		String response;
+		String temp;
 		Socket clientSocket = null;
 		try {
-			clientSocket = new Socket("127.0.0.1", 11218);
+			clientSocket = new Socket("127.0.0.1", 11212);
 			DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
 			BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			while (true) {
 				request = inFromUser.readLine();
-				outToServer.writeBytes(request + '\n');
+				request += "\r\n";
+				if ( !(request.equals("version") || request.equals("flush_all")) ) {
+					request += inFromUser.readLine();
+					request += "\r\n";
+				}
+
+				outToServer.writeBytes(request);
 				response = inFromServer.readLine();
 				System.out.println("FROM SERVER: " + response);
 			}
