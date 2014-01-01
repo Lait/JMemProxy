@@ -22,9 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class JMemProxyFrontend implements Runnable {
+public class JMemProxyHandler implements Runnable {
 	private static Selector         selector;
-	private static JMemProxyBackend backend;
 	
 	private int                     port;
 	private InetAddress             host;
@@ -32,9 +31,8 @@ public class JMemProxyFrontend implements Runnable {
 	private ServerSocketChannel     channel;
 	private ByteBuffer              globalBuffer;
 	
-	public JMemProxyFrontend(int port, InetAddress host, JMemProxyBackend backend) throws IOException {
-		JMemProxyFrontend.selector = Selector.open();
-		JMemProxyFrontend.backend  = backend;
+	public JMemProxyHandler(int port, InetAddress host) throws IOException {
+		JMemProxyHandler.selector = Selector.open();
 		
 		this.port = port;
 		this.host = host;
@@ -66,12 +64,12 @@ public class JMemProxyFrontend implements Runnable {
 	public void run() {
 		try {
 			channel.socket().bind(new InetSocketAddress(port)); //or InetSocketAddress(host, port)
-			channel.register(JMemProxyFrontend.selector, SelectionKey.OP_ACCEPT);
+			channel.register(JMemProxyHandler.selector, SelectionKey.OP_ACCEPT);
 			while (true) {
-				int count = JMemProxyFrontend.selector.select();
+				int count = JMemProxyHandler.selector.select();
 				if (count < 1) continue;
 				
-				Iterator<SelectionKey> iterator = JMemProxyFrontend.selector.selectedKeys().iterator();
+				Iterator<SelectionKey> iterator = JMemProxyHandler.selector.selectedKeys().iterator();
 				while (iterator.hasNext()) {
 					SelectionKey key = iterator.next();
 					iterator.remove();
@@ -80,7 +78,7 @@ public class JMemProxyFrontend implements Runnable {
 					if (key.isAcceptable()) {
 						SocketChannel ch = ((ServerSocketChannel)key.channel()).accept();
 						ch.configureBlocking(false);
-						ch.register(JMemProxyFrontend.selector, SelectionKey.OP_READ);
+						ch.register(JMemProxyHandler.selector, SelectionKey.OP_READ);
 					} else if (key.isReadable()) {
 						readAndDispatch(key);
 					}

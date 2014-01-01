@@ -16,28 +16,28 @@ import java.util.TreeMap;
 import jmemproxy.memcache.*;
 
 public class Ketama {
-	private SortedMap<Integer, MemcacheServer> circle;
+	private SortedMap<Integer, MemcacheInteractor> circle;
 	private HashFunction hashfunction;
 	private int numOfReplicates;
 	
-	public Ketama(HashFunction hashfunction, int numOfReplicates, Collection<MemcacheServer> nodes) {
-		this.hashfunction = hashfunction;
+	public Ketama(int numOfReplicates, Collection<MemcacheInteractor> nodes) {
+		this.hashfunction = new MD5Hash();
 		this.numOfReplicates = numOfReplicates;
-		this.circle = new TreeMap<Integer,  MemcacheServer>();
+		this.circle = new TreeMap<Integer,  MemcacheInteractor>();
 		
 		if (nodes != null) {
-			for (MemcacheServer node : nodes) {
+			for (MemcacheInteractor node : nodes) {
 				addServer(node);
 			}
 		}
 	}
 	
-	public MemcacheServer getServer(Object key) {
+	public MemcacheInteractor getServer(Object key) {
 		if (circle.isEmpty()) return null;
 		
 		int keyhash = this.hashfunction.hash(key);
 		if (!circle.containsKey(keyhash)) {
-			SortedMap<Integer, MemcacheServer> tailmap = circle.tailMap(this.hashfunction.hash(key));
+			SortedMap<Integer, MemcacheInteractor> tailmap = circle.tailMap(this.hashfunction.hash(key));
 			if (tailmap.isEmpty()) {
 				keyhash = (int) circle.firstKey();
 			} else {
@@ -48,11 +48,11 @@ public class Ketama {
 		return circle.get(keyhash);
 	}
 	
-	public final SortedMap<Integer, MemcacheServer> getAvailableServers() {
+	public final SortedMap<Integer, MemcacheInteractor> getAvailableServers() {
 		return this.circle;
 	}
 	
-	public void addServer(MemcacheServer node) {
+	public void addServer(MemcacheInteractor node) {
 		// Add virtual nodes to the circle , it there a better way?
 		// This one is too simple, and not effective enough.
 		// Some better approaches needed! XD
@@ -62,7 +62,7 @@ public class Ketama {
 		}
 	}
 	
-	public void removeServer(MemcacheServer node) {
+	public void removeServer(MemcacheInteractor node) {
 		int hash = 0;
 		for (int i = 0; i < this.numOfReplicates; i++) {
 			hash = this.hashfunction.hash(node.toString() + i);
