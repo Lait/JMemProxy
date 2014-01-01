@@ -1,43 +1,51 @@
 package jmemproxy;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.List;
 
 import jmemproxy.consistenthashing.Ketama;
+import jmemproxy.memcache.ClientRequest;
 import jmemproxy.memcache.MemcacheHandler;
+import jmemproxy.memcache.MemcacheInteractor;
 
 
 public class JMemProxy {
 	private int         port;
 	private InetAddress host;
 	
-	private JMemProxyHandler       frontend;
-	private JMemProxyConfig        config;
-	private List<MemcacheHandler>  handlers;
-	private Ketama                 ketama;
+	private static JMemProxyHandler       frontend;
+	private static JMemProxyConfig        config;
+	private static List<MemcacheHandler>  handlers;
+	private static Ketama                 ketama;
 	
-	public JMemProxy(InetAddress host, int port) throws Exception {
+	public JMemProxy() throws Exception {
 		this.host     = host;
 		this.port     = port;
 
-		this.config   = new JMemProxyConfig();
-		this.config.initialParams();
+		JMemProxy.config   = new JMemProxyConfig();
+		JMemProxy.config.initialParams();
 		
-		this.frontend = this.config.initialFrontend();
-		this.handlers = this.config.initialMemcacheHandlers();
-		this.ketama   = this.config.initialHashfunction();
+		JMemProxy.frontend = JMemProxy.config.initialFrontend();
+		JMemProxy.handlers = JMemProxy.config.initialMemcacheHandlers();
+		JMemProxy.ketama   = JMemProxy.config.initialHashfunction();
 	}
 	
 	public void start() {
 		System.out.println("JMemProxy running on port " + this.port);
-		this.frontend.run();
-		for (MemcacheHandler handler : this.handlers) {
+		JMemProxy.frontend.run();
+		for (MemcacheHandler handler : JMemProxy.handlers) {
 			handler.run();
 		}
 	}
 	
+	public static void processRequest(ClientRequest req) throws IOException {
+		MemcacheInteractor interactor = JMemProxy.ketama.getServer("");
+		interactor.pushRequest(req);
+	}
+	
 	public static void main(String[] args) throws Exception {
-		JMemProxy proxy = new JMemProxy(InetAddress.getLocalHost(), 11218);
+		JMemProxy proxy = new JMemProxy();
 		proxy.start();
 	}
 }

@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import jmemproxy.memcache.ClientRequest;
+
 public class JMemProxyHandler implements Runnable {
 	private static Selector         selector;
 	
@@ -51,8 +53,7 @@ public class JMemProxyHandler implements Runnable {
 		if (num > 0) {
 			globalBuffer.flip();
 			byte[] buf = Arrays.copyOfRange(globalBuffer.array(), 0, num);
-			
-			//key.interestOps(key.interestOps() | SelectionKey.OP_WRITE);
+			JMemProxy.processRequest(new ClientRequest(aChannel, buf));
 			System.out.println("read from: " + aChannel.socket().getRemoteSocketAddress() + 
 							   "; message: " + new String(buf));
 		}

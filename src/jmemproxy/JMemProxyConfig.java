@@ -1,5 +1,7 @@
 package jmemproxy;
 
+import java.net.InetAddress;
+import java.util.LinkedList;
 import java.util.List;
 
 import jmemproxy.consistenthashing.Ketama;
@@ -8,23 +10,25 @@ import jmemproxy.memcache.MemcacheHandler;
 public class JMemProxyConfig {
 
 	public void initialParams() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	public JMemProxyHandler initialFrontend() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return new JMemProxyHandler(11218, InetAddress.getLocalHost());
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public List<MemcacheHandler> initialMemcacheHandlers() {
-		// TODO Auto-generated method stub
-		return null;
+		List<MemcacheHandler> handlers = new LinkedList<MemcacheHandler>();
+		return handlers;
 	}
 
 	public Ketama initialHashfunction() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Ketama(1, null);
 	}
 	
 }

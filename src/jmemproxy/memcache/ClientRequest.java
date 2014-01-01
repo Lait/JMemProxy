@@ -4,18 +4,18 @@ import java.nio.channels.SocketChannel;
 
 public class ClientRequest {
 	private SocketChannel channel;
-	private String requestString;
+	private byte[] requestString;
 	
-	public ClientRequest(SocketChannel c, String r) {
+	public ClientRequest(SocketChannel c, byte[] buf) {
 		this.channel = c;
-		this.requestString = r;
+		this.requestString = buf;
 	}
 	
 	public SocketChannel getChannel() {
 		return this.channel;
 	}
 	
-	public String getRequestString() {
+	public byte[] getRequestString() {
 		return this.requestString;
 	}
 }

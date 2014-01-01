@@ -1,6 +1,7 @@
 package jmemproxy.memcache;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -8,17 +9,17 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
 public class MemcacheInteractor {
+	public static final int MAXCONNECTION = 8;
 	private String ip;
 	private int port;
 	private Selector selector;
 	private Queue<ClientRequest> requests;
 	private Map<SocketChannel, SocketChannel> usedConnections;
-	private List<SocketChannel>  unusedConnections;
+	private Queue<SocketChannel>  unusedConnections;
 	private ByteBuffer buffer;
 	
 	public MemcacheInteractor(int port, String ip) throws IOException {
@@ -29,12 +30,43 @@ public class MemcacheInteractor {
 		this.buffer = ByteBuffer.allocate(1024);
 	}
 	
-	public void pushRequest(ClientRequest req) {
-		this.requests.add(req);
+	private SocketChannel newConnection() throws IOException {
+		SocketChannel newChannel = SocketChannel.open();
+		newChannel.configureBlocking(false);
+		newChannel.connect(new InetSocketAddress(this.ip, this.port));
+		return newChannel;
+	}
+	
+	private void addConnections() throws IOException {
+		for (int i = 1; i <= (MAXCONNECTION - this.unusedConnections.size() - this.usedConnections.size()); i++) {
+			this.unusedConnections.add(this.newConnection());
+		}
+	}
+	
+	public void pushRequest(ClientRequest req) throws IOException {
+		if (this.unusedConnections.isEmpty()) {
+			this.requests.add(req);
+		}
+		else {
+			SocketChannel freeChannel = this.unusedConnections.poll();
+			while (!freeChannel.isConnected()) {
+				freeChannel.close();
+				if (this.unusedConnections.isEmpty()) {
+					this.requests.add(req);
+					this.addConnections();
+					return;
+				}
+				freeChannel = this.unusedConnections.poll();
+			}
+			this.buffer.clear();
+			this.buffer.put(req.getRequestString());
+			this.buffer.flip();
+			freeChannel.write(this.buffer);
+			this.usedConnections.put(freeChannel, req.getChannel());
+		}
 	}
 
 	public void mainloop() {
-		// TODO Auto-generated method stub
 		try {
 			while (true) {
 				int count = this.selector.select();
@@ -67,11 +99,10 @@ public class MemcacheInteractor {
 							else {
 								ClientRequest firstReq = this.requests.poll();
 								this.buffer.clear();
-								this.buffer.put(firstReq.getRequestString().getBytes("UTF-8"));
+								this.buffer.put(firstReq.getRequestString());
 								this.buffer.flip();
 								serverChannel.write(this.buffer);
 								this.usedConnections.put(serverChannel, firstReq.getChannel());
-								
 							}
 							
 						}
