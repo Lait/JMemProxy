@@ -13,21 +13,21 @@ public class JMemProxyConfig {
 		
 	}
 
-	public JMemProxyHandler initialFrontend() {
+	public JMemProxyClientRequestHandler getFrontend() {
 		try {
-			return new JMemProxyHandler(11218, InetAddress.getLocalHost());
+			return new JMemProxyClientRequestHandler(11218, InetAddress.getLocalHost());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public List<MemcacheHandler> initialMemcacheHandlers() {
+	public List<MemcacheHandler> getMemcacheHandlers() {
 		List<MemcacheHandler> handlers = new LinkedList<MemcacheHandler>();
 		return handlers;
 	}
 
-	public Ketama initialHashfunction() {
+	public Ketama getHashfunction() {
 		return new Ketama(1, null);
 	}
 	

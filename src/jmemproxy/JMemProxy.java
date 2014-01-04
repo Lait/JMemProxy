@@ -10,29 +10,22 @@ import jmemproxy.memcache.MemcacheHandler;
 import jmemproxy.memcache.MemcacheInteractor;
 
 
-public class JMemProxy {
-	private int         port;
-	private InetAddress host;
-	
-	private static JMemProxyHandler       frontend;
-	private static JMemProxyConfig        config;
-	private static List<MemcacheHandler>  handlers;
-	private static Ketama                 ketama;
+public class JMemProxy {	
+	private static JMemProxyClientRequestHandler frontend;
+	private static JMemProxyConfig        		 config;
+	private static List<MemcacheHandler>         handlers;
+	private static Ketama                        ketama;
 	
 	public JMemProxy() throws Exception {
-		this.host     = host;
-		this.port     = port;
-
 		JMemProxy.config   = new JMemProxyConfig();
 		JMemProxy.config.initialParams();
 		
-		JMemProxy.frontend = JMemProxy.config.initialFrontend();
-		JMemProxy.handlers = JMemProxy.config.initialMemcacheHandlers();
-		JMemProxy.ketama   = JMemProxy.config.initialHashfunction();
+		JMemProxy.frontend = JMemProxy.config.getFrontend();
+		JMemProxy.handlers = JMemProxy.config.getMemcacheHandlers();
+		JMemProxy.ketama   = JMemProxy.config.getHashfunction();
 	}
 	
 	public void start() {
-		System.out.println("JMemProxy running on port " + this.port);
 		JMemProxy.frontend.run();
 		for (MemcacheHandler handler : JMemProxy.handlers) {
 			handler.run();

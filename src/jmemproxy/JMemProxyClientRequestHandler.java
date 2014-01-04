@@ -24,7 +24,7 @@ import java.util.Map;
 
 import jmemproxy.memcache.ClientRequest;
 
-public class JMemProxyHandler implements Runnable {
+public class JMemProxyClientRequestHandler implements Runnable {
 	private static Selector         selector;
 	
 	private int                     port;
@@ -33,8 +33,8 @@ public class JMemProxyHandler implements Runnable {
 	private ServerSocketChannel     channel;
 	private ByteBuffer              globalBuffer;
 	
-	public JMemProxyHandler(int port, InetAddress host) throws IOException {
-		JMemProxyHandler.selector = Selector.open();
+	public JMemProxyClientRequestHandler(int port, InetAddress host) throws IOException {
+		JMemProxyClientRequestHandler.selector = Selector.open();
 		
 		this.port = port;
 		this.host = host;
@@ -45,7 +45,7 @@ public class JMemProxyHandler implements Runnable {
 		this.globalBuffer = ByteBuffer.allocate(1024);
 	}
 	
-	//Read from a client socket, and dispatch the request to the back end .
+	//从客户连接中读取出数据并发送到后端对应的memcached节点。
 	private void readAndDispatch(SelectionKey key) throws IOException {
 		SocketChannel aChannel = (SocketChannel)key.channel();
 		globalBuffer.clear();
@@ -63,14 +63,15 @@ public class JMemProxyHandler implements Runnable {
 	}
 	
 	public void run() {
+		System.out.println("JMemProxy is running on port " + this.port);
 		try {
 			channel.socket().bind(new InetSocketAddress(port)); //or InetSocketAddress(host, port)
-			channel.register(JMemProxyHandler.selector, SelectionKey.OP_ACCEPT);
+			channel.register(JMemProxyClientRequestHandler.selector, SelectionKey.OP_ACCEPT);
 			while (true) {
-				int count = JMemProxyHandler.selector.select();
+				int count = JMemProxyClientRequestHandler.selector.select();
 				if (count < 1) continue;
 				
-				Iterator<SelectionKey> iterator = JMemProxyHandler.selector.selectedKeys().iterator();
+				Iterator<SelectionKey> iterator = JMemProxyClientRequestHandler.selector.selectedKeys().iterator();
 				while (iterator.hasNext()) {
 					SelectionKey key = iterator.next();
 					iterator.remove();
@@ -79,7 +80,7 @@ public class JMemProxyHandler implements Runnable {
 					if (key.isAcceptable()) {
 						SocketChannel ch = ((ServerSocketChannel)key.channel()).accept();
 						ch.configureBlocking(false);
-						ch.register(JMemProxyHandler.selector, SelectionKey.OP_READ);
+						ch.register(JMemProxyClientRequestHandler.selector, SelectionKey.OP_READ);
 					} else if (key.isReadable()) {
 						readAndDispatch(key);
 					}
