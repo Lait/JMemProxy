@@ -1,4 +1,4 @@
-package jmemproxy.consistenthashing.test;
+package jmemproxy.hashing.test;
 
 import static org.junit.Assert.*;
 

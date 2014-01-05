@@ -1,4 +1,4 @@
-package jmemproxy.consistenthashing;
+package jmemproxy.hashing;
 
 /*
  * Ketama.java
@@ -13,31 +13,31 @@ import java.util.Collection;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import jmemproxy.memcache.*;
+import jmemproxy.backend.*;
 
 public class Ketama {
-	private SortedMap<Integer, MemcacheInteractor> circle;
+	private SortedMap<Integer, VirtualServer> circle;
 	private HashFunction hashfunction;
 	private int numOfReplicates;
 	
-	public Ketama(int numOfReplicates, Collection<MemcacheInteractor> nodes) {
+	public Ketama(int numOfReplicates, Collection<VirtualServer> servers) {
 		this.hashfunction = new MD5Hash();
 		this.numOfReplicates = numOfReplicates;
-		this.circle = new TreeMap<Integer,  MemcacheInteractor>();
+		this.circle = new TreeMap<Integer,  VirtualServer>();
 		
-		if (nodes != null) {
-			for (MemcacheInteractor node : nodes) {
-				addServer(node);
+		if (servers != null) {
+			for (VirtualServer server : servers) {
+				addServer(server);
 			}
 		}
 	}
 	
-	public MemcacheInteractor getServer(Object key) {
+	public VirtualServer getServer(Object key) {
 		if (circle.isEmpty()) return null;
 		
 		int keyhash = this.hashfunction.hash(key);
 		if (!circle.containsKey(keyhash)) {
-			SortedMap<Integer, MemcacheInteractor> tailmap = circle.tailMap(this.hashfunction.hash(key));
+			SortedMap<Integer, VirtualServer> tailmap = circle.tailMap(this.hashfunction.hash(key));
 			if (tailmap.isEmpty()) {
 				keyhash = (int) circle.firstKey();
 			} else {
@@ -48,21 +48,18 @@ public class Ketama {
 		return circle.get(keyhash);
 	}
 	
-	public final SortedMap<Integer, MemcacheInteractor> getAvailableServers() {
+	public final SortedMap<Integer, VirtualServer> getAvailableServers() {
 		return this.circle;
 	}
 	
-	public void addServer(MemcacheInteractor node) {
-		// Add virtual nodes to the circle , it there a better way?
-		// This one is too simple, and not effective enough.
-		// Some better approaches needed! XD
+	public void addServer(VirtualServer server) {
 		for (int i = 0; i < this.numOfReplicates; i++) {
-			int hash = this.hashfunction.hash(node.toString() + i);
-			this.circle.put(hash, node);
+			int hash = this.hashfunction.hash(server.toString() + i);
+			this.circle.put(hash, server);
 		}
 	}
 	
-	public void removeServer(MemcacheInteractor node) {
+	public void removeServer(MemcachedNode node) {
 		int hash = 0;
 		for (int i = 0; i < this.numOfReplicates; i++) {
 			hash = this.hashfunction.hash(node.toString() + i);

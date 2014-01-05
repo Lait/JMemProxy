@@ -4,8 +4,9 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 
-import jmemproxy.consistenthashing.Ketama;
-import jmemproxy.memcache.MemcacheHandler;
+import jmemproxy.backend.MemcachedNode;
+import jmemproxy.backend.VirtualServer;
+import jmemproxy.hashing.Ketama;
 
 public class JMemProxyConfig {
 
@@ -22,9 +23,9 @@ public class JMemProxyConfig {
 		}
 	}
 
-	public List<MemcacheHandler> getMemcacheHandlers() {
-		List<MemcacheHandler> handlers = new LinkedList<MemcacheHandler>();
-		return handlers;
+	public List<VirtualServer> getServers() {
+		List<VirtualServer> servers = new LinkedList<VirtualServer>();
+		return servers;
 	}
 
 	public Ketama getHashfunction() {

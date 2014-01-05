@@ -18,14 +18,14 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.logging.Logger;
 
-import jmemproxy.memcache.ClientRequest;
+import jmemproxy.client.ClientRequest;
 
-public class JMemProxyClientRequestHandler implements Runnable {
-	private static Selector         selector;
+public class JMemProxyClientRequestHandler extends Thread {
+	private static Selector selector;
+	private static final Logger logger = Logger.getLogger(JMemProxyClientRequestHandler.class.getName());
 	
 	private int                     port;
 	private InetAddress             host;
@@ -55,7 +55,7 @@ public class JMemProxyClientRequestHandler implements Runnable {
 			byte[] buf = Arrays.copyOfRange(globalBuffer.array(), 0, num);
 			JMemProxy.processRequest(new ClientRequest(aChannel, buf));
 			System.out.println("read from: " + aChannel.socket().getRemoteSocketAddress() + 
-							   "; message: " + new String(buf));
+							   ", message: " + new String(buf));
 		}
 		else {
 			key.cancel();
@@ -63,7 +63,7 @@ public class JMemProxyClientRequestHandler implements Runnable {
 	}
 	
 	public void run() {
-		System.out.println("JMemProxy is running on port " + this.port);
+		logger.info("JMemProxy is running on port " + this.port);
 		try {
 			channel.socket().bind(new InetSocketAddress(port)); //or InetSocketAddress(host, port)
 			channel.register(JMemProxyClientRequestHandler.selector, SelectionKey.OP_ACCEPT);
@@ -81,6 +81,7 @@ public class JMemProxyClientRequestHandler implements Runnable {
 						SocketChannel ch = ((ServerSocketChannel)key.channel()).accept();
 						ch.configureBlocking(false);
 						ch.register(JMemProxyClientRequestHandler.selector, SelectionKey.OP_READ);
+						logger.info("New connection from client: " + ch.getRemoteAddress().toString());
 					} else if (key.isReadable()) {
 						readAndDispatch(key);
 					}

@@ -1,10 +1,10 @@
-package jmemproxy.memcache.test;
+package jmemproxy.backend.test;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public class MemcacheInteractorTest {
+public class MemcacheServerTest {
 
 	@Test
 	public void test() {

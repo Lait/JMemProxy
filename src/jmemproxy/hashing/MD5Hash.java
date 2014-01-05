@@ -1,4 +1,4 @@
-package jmemproxy.consistenthashing;
+package jmemproxy.hashing;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

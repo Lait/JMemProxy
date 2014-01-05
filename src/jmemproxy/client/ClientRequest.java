@@ -1,4 +1,4 @@
-package jmemproxy.memcache;
+package jmemproxy.client;
 
 import java.nio.channels.SocketChannel;
 
