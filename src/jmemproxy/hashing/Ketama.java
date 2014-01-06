@@ -16,28 +16,28 @@ import java.util.TreeMap;
 import jmemproxy.backend.*;
 
 public class Ketama {
-	private SortedMap<Integer, VirtualServer> circle;
+	private SortedMap<Integer, VirtualHAServer> circle;
 	private HashFunction hashfunction;
 	private int numOfReplicates;
 	
-	public Ketama(int numOfReplicates, Collection<VirtualServer> servers) {
+	public Ketama(int numOfReplicates, Collection<VirtualHAServer> servers) {
 		this.hashfunction = new MD5Hash();
 		this.numOfReplicates = numOfReplicates;
-		this.circle = new TreeMap<Integer,  VirtualServer>();
+		this.circle = new TreeMap<Integer,  VirtualHAServer>();
 		
 		if (servers != null) {
-			for (VirtualServer server : servers) {
+			for (VirtualHAServer server : servers) {
 				addServer(server);
 			}
 		}
 	}
 	
-	public VirtualServer getServer(Object key) {
+	public VirtualHAServer getServer(Object key) {
 		if (circle.isEmpty()) return null;
 		
 		int keyhash = this.hashfunction.hash(key);
 		if (!circle.containsKey(keyhash)) {
-			SortedMap<Integer, VirtualServer> tailmap = circle.tailMap(this.hashfunction.hash(key));
+			SortedMap<Integer, VirtualHAServer> tailmap = circle.tailMap(this.hashfunction.hash(key));
 			if (tailmap.isEmpty()) {
 				keyhash = (int) circle.firstKey();
 			} else {
@@ -48,13 +48,13 @@ public class Ketama {
 		return circle.get(keyhash);
 	}
 	
-	public final SortedMap<Integer, VirtualServer> getAvailableServers() {
+	public final SortedMap<Integer, VirtualHAServer> getAvailableServers() {
 		return this.circle;
 	}
 	
-	public void addServer(VirtualServer server) {
+	public void addServer(VirtualHAServer server) {
 		for (int i = 0; i < this.numOfReplicates; i++) {
-			int hash = this.hashfunction.hash(server.toString() + i);
+			int hash = this.hashfunction.hash(server.getServerID() + i);
 			this.circle.put(hash, server);
 		}
 	}

@@ -5,10 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jmemproxy.backend.MemcachedNode;
-import jmemproxy.backend.VirtualServer;
+import jmemproxy.backend.VirtualHAServer;
 import jmemproxy.hashing.Ketama;
 
 public class JMemProxyConfig {
+	
 
 	public void initialParams() {
 		
@@ -23,13 +24,18 @@ public class JMemProxyConfig {
 		}
 	}
 
-	public List<VirtualServer> getServers() {
-		List<VirtualServer> servers = new LinkedList<VirtualServer>();
+	public List<VirtualHAServer> getServers() {
+		List<VirtualHAServer> servers = new LinkedList<VirtualHAServer>();
 		return servers;
 	}
 
 	public Ketama getHashfunction() {
 		return new Ketama(1, null);
+	}
+
+	public JMemProxyClientRequestHandler getClientHandler() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

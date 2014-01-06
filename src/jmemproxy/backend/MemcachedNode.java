@@ -28,7 +28,7 @@ public class MemcachedNode extends Thread {
 	private int memcachedPort;
 	
 	private int    sshPort;
-	private String sshPW;
+	private String sshPassword;
 	
 	private Selector selector;
 	private Queue<ClientRequest> requests;
@@ -36,11 +36,11 @@ public class MemcachedNode extends Thread {
 	private Queue<SocketChannel>  freeConnections;
 	private ByteBuffer buffer;
 	
-	public MemcachedNode(int port, String ip, Queue<ClientRequest> reqs) throws IOException {
+	public MemcachedNode(int port, String ip) throws IOException {
 		this.memcachedPort = port;
 		this.remoteIp   = ip;
 		this.selector = Selector.open();
-		this.requests = reqs;
+		this.requests = new LinkedList<ClientRequest>();
 		this.busyConnections = new HashMap<SocketChannel, SocketChannel>();
 		this.freeConnections = new LinkedList<SocketChannel>();
 		this.buffer = ByteBuffer.allocate(1024);
@@ -60,7 +60,7 @@ public class MemcachedNode extends Thread {
 	}
 	
 	//创建一个连接到Memcached节点的新连接，如果不能创建则返回null
-	private SocketChannel newConnection() {
+	private SocketChannel createNewConnection() {
 		try {
 			SocketChannel newChannel = SocketChannel.open();
 			newChannel.configureBlocking(false);
@@ -81,10 +81,18 @@ public class MemcachedNode extends Thread {
 		}
 		
 		for (int i = 1; i <= (MAXCONNCOUNT - this.freeConnections.size() - this.busyConnections.size()); i++) {
-			this.freeConnections.add(this.newConnection());
+			this.freeConnections.add(this.createNewConnection());
 		}
 		
 		return true;
+	}
+	
+	public Boolean pushRequest(ClientRequest req) {
+		synchronized(this.requests) {
+			Boolean flag = this.requests.add(req);
+			this.requests.notifyAll();
+			return flag;
+		}
 	}
 	
 	//从请求队列里面取出一个未处理的请求分配到一个空闲的连接中发送
@@ -116,7 +124,7 @@ public class MemcachedNode extends Thread {
 						if (this.addConnections() == true)
 							this.processNextReq();
 					}
-				}
+				} 
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			} finally {
@@ -129,13 +137,6 @@ public class MemcachedNode extends Thread {
 		return this.remoteIp + this.memcachedPort;
 	}
 
-	//主循环
-	public void run() {
-		while(true) {
-			
-		}
-	}
-	/*
 	public void run() {
 		try {
 			while (true) {
@@ -190,5 +191,4 @@ public class MemcachedNode extends Thread {
 			ex.printStackTrace();
 		}
 	}
-	*/
 }

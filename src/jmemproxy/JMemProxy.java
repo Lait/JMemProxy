@@ -1,37 +1,40 @@
 package jmemproxy;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.LinkedList;
 import java.util.List;
 
-import jmemproxy.backend.VirtualServer;
+import jmemproxy.backend.VirtualHAServer;
 import jmemproxy.client.ClientRequest;
 import jmemproxy.hashing.Ketama;
 
 
 public class JMemProxy {	
-	private static JMemProxyClientRequestHandler frontend;
+	private static JMemProxyClientRequestHandler clientHandler;
+	private static final int port = 11218;
+	
 	private static JMemProxyConfig        		 config;
-	private static List<VirtualServer>           servers;
+	private static List<VirtualHAServer>         servers;
 	private static Ketama                        ketama;
 	
 	public JMemProxy() throws Exception {
-		JMemProxy.config   = new JMemProxyConfig();
-		JMemProxy.config.initialParams();
-		
-		JMemProxy.frontend = JMemProxy.config.getFrontend();
-		JMemProxy.servers  = JMemProxy.config.getServers();
-		JMemProxy.ketama   = JMemProxy.config.getHashfunction();
+
+		clientHandler = new JMemProxyClientRequestHandler(port, InetAddress.getLocalHost());
+		servers       = new LinkedList<VirtualHAServer>();
+		servers.add(new VirtualHAServer(1234, "127.0.0.1"));
+		ketama        = new Ketama(1, null);
 	}
 	
 	public void start() {
-		JMemProxy.frontend.start();
-		for (VirtualServer server : JMemProxy.servers) {
+		clientHandler.start();
+		for (VirtualHAServer server : JMemProxy.servers) {
 			server.run();
 		}
 	}
 	
 	public static void processRequest(ClientRequest req) throws IOException {
-		VirtualServer server = JMemProxy.ketama.getServer(req.getRequestString());
+		VirtualHAServer server = ketama.getServer(req.getRequestString());
 		server.pushRequest(req);
 	}
 	
