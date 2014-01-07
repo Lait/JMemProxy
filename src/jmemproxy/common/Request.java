@@ -1,12 +1,12 @@
-package jmemproxy.client;
+package jmemproxy.common;
 
 import java.nio.channels.SocketChannel;
 
-public class ClientRequest {
+public class Request {
 	private SocketChannel channel;
 	private byte[] requestString;
 	
-	public ClientRequest(SocketChannel c, byte[] buf) {
+	public Request(SocketChannel c, byte[] buf) {
 		this.channel = c;
 		this.requestString = buf;
 	}

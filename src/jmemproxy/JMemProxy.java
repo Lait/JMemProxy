@@ -2,44 +2,47 @@ package jmemproxy;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.LinkedList;
-import java.util.List;
 
-import jmemproxy.backend.VirtualHAServer;
-import jmemproxy.client.ClientRequest;
-import jmemproxy.hashing.Ketama;
+import jmemproxy.common.Request;
 
-
-public class JMemProxy {	
-	private static JMemProxyClientRequestHandler clientHandler;
-	private static final int port = 11218;
+public class JMemProxy {
+	private static JMemProxy instance = new JMemProxy();
+	private static final String configurePath = "..\\conf\\jmemproxy.conf";
+	private static final String dataPaht = "..\\data\\jmemproxy.db";
 	
-	private static JMemProxyConfig        		 config;
-	private static List<VirtualHAServer>         servers;
-	private static Ketama                        ketama;
+	private JMemProxyFrontend frontend;
+	private JMemProxyBackend  backend;
 	
-	public JMemProxy() throws Exception {
-
-		clientHandler = new JMemProxyClientRequestHandler(port, InetAddress.getLocalHost());
-		servers       = new LinkedList<VirtualHAServer>();
-		servers.add(new VirtualHAServer(1234, "127.0.0.1"));
-		ketama        = new Ketama(1, null);
+	public static JMemProxy getInstance() {
+		return instance;
 	}
 	
-	public void start() {
-		clientHandler.start();
-		for (VirtualHAServer server : JMemProxy.servers) {
-			server.run();
+	private JMemProxy() {
+		try {
+			this.frontend = new JMemProxyFrontend(11218, InetAddress.getLocalHost());
+			this.backend = new JMemProxyBackend();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
-	public static void processRequest(ClientRequest req) throws IOException {
-		VirtualHAServer server = ketama.getServer(req.getRequestString());
-		server.pushRequest(req);
+	public void dispatchRequest(Request req) {
+		try {
+			this.backend.processRequest(req);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void start() {
+		this.frontend.start();
+		this.backend.start();
 	}
 	
 	public static void main(String[] args) throws Exception {
-		JMemProxy proxy = new JMemProxy();
+		JMemProxy proxy = JMemProxy.getInstance();
 		proxy.start();
 	}
+
+
 }

@@ -1,4 +1,4 @@
-package jmemproxy.testtools;
+package test.testtools;
 
 /*
  * TcpServer.java

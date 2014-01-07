@@ -1,4 +1,4 @@
-package jmemproxy.backend;
+package jmemproxy.server;
 
 /*
  * 
@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.logging.Logger;
 
-import jmemproxy.client.ClientRequest;
+import jmemproxy.common.Request;
 
 public class MemcachedNode extends Thread {
 	private static final int MAXCONNCOUNT = 8;
@@ -31,7 +31,7 @@ public class MemcachedNode extends Thread {
 	private String sshPassword;
 	
 	private Selector selector;
-	private Queue<ClientRequest> requests;
+	private Queue<Request> requests;
 	private Map<SocketChannel, SocketChannel> busyConnections;
 	private Queue<SocketChannel>  freeConnections;
 	private ByteBuffer buffer;
@@ -40,7 +40,7 @@ public class MemcachedNode extends Thread {
 		this.memcachedPort = port;
 		this.remoteIp   = ip;
 		this.selector = Selector.open();
-		this.requests = new LinkedList<ClientRequest>();
+		this.requests = new LinkedList<Request>();
 		this.busyConnections = new HashMap<SocketChannel, SocketChannel>();
 		this.freeConnections = new LinkedList<SocketChannel>();
 		this.buffer = ByteBuffer.allocate(1024);
@@ -87,7 +87,7 @@ public class MemcachedNode extends Thread {
 		return true;
 	}
 	
-	public Boolean pushRequest(ClientRequest req) {
+	public Boolean pushRequest(Request req) {
 		synchronized(this.requests) {
 			Boolean flag = this.requests.add(req);
 			this.requests.notifyAll();
@@ -102,7 +102,7 @@ public class MemcachedNode extends Thread {
 				if (!this.requests.isEmpty()) {
 					if (!this.freeConnections.isEmpty()) {
 						SocketChannel freeChannel = this.freeConnections.poll();
-						ClientRequest req = this.requests.poll();
+						Request req = this.requests.poll();
 						while (!freeChannel.isConnected()) {
 							freeChannel.close();
 							if (this.freeConnections.isEmpty()) {
